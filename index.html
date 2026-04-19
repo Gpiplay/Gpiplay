@@ -170,13 +170,64 @@ document.exitFullscreen()
 
 function closePreview(){document.getElementById('previewModal').style.display='none'}
 
-function loadGLB(el,url,controlsEnabled){
-const scene=new THREE.Scene()
-const camera=new THREE.PerspectiveCamera(45,el.clientWidth/el.clientHeight,.1,1000)
-const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true})
-renderer.setSize(el.clientWidth,el.clientHeight)
+function loadGLB(el, url, enableControls = true){
+
+const scene = new THREE.Scene()
+
+const camera = new THREE.PerspectiveCamera(
+45,
+el.clientWidth / el.clientHeight,
+0.1,
+1000
+)
+
+const renderer = new THREE.WebGLRenderer({
+alpha: true,
+antialias: true
+})
+
+renderer.setSize(el.clientWidth, el.clientHeight)
+el.innerHTML = ""
 el.appendChild(renderer.domElement)
 
+const light = new THREE.DirectionalLight(0xffffff, 1)
+light.position.set(5,5,5)
+scene.add(light)
+
+const loader = new THREE.GLTFLoader()
+
+let model
+
+loader.load(url, (gltf)=>{
+model = gltf.scene
+scene.add(model)
+})
+
+camera.position.set(2,2,5)
+
+let controls
+if(enableControls && THREE.OrbitControls){
+controls = new THREE.OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true
+controls.enableZoom = true
+controls.enablePan = false
+}
+
+function animate(){
+requestAnimationFrame(animate)
+
+if(model){
+model.rotation.y += 0.003
+}
+
+if(controls) controls.update()
+
+renderer.render(scene, camera)
+}
+
+animate()
+
+}
 const light=new THREE.DirectionalLight(0xffffff,1)
 light.position.set(5,5,5)
 scene.add(light)
